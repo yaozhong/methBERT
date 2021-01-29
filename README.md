@@ -1,7 +1,7 @@
 # BERT model for nanopore methylation detection
 
 
-![](figures/BERT_model_refined.eps)
+![](figures/BERT_model_refined.png)
 
 
 ## Docker enviroment
