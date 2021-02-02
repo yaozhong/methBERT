@@ -4,11 +4,6 @@ import torch, math
 import torch.nn as nn
 import torch.nn.functional as F
 
-SEQ_LEN=21
-SIDE_WINDOW_LIMIT=3
-
-PRIOR_STD=5.0
-CENTER_POS=10.0
 
 ### basic modules ###
 class GELU(nn.Module):
@@ -69,45 +64,10 @@ def positional_beta_enc(att_center, len, att_std):
 	d = torch.exp_(dist.log_prob(position))
 	return d
 
-# absolute position encoding.  
-class PositionalEmbedding_weight(nn.Module):
-	def __init__(self, d_model,  motif_shift, motif_len, max_len=SEQ_LEN):
-		super(PositionalEmbedding_weight, self).__init__()
-
-		self.pe = torch.zeros(max_len, d_model).float().cuda()
-		self.pe.require_grad = False
-
-		# 6ma, M_dam_gAtc
-		self.weight = torch.tensor([ 0.0129,  0.0140,  0.0111,  0.0137,  0.0128,  0.0100,  0.0070,  0.0247,0.0193, -0.0162, 
-		 0.0748,  0.0838,  0.0118,  0.0029,  0.0077,  0.0098, 0.0100,  0.0120,  0.0104,  0.0106,  0.0120])
-		self.weight_var = torch.tensor([0.2221, 0.2293, 0.2312, 0.2214, 0.2240, 0.2301, 0.2206, 0.2287, 0.2540,
-			0.2597, 0.2845, 0.4460, 0.2490, 0.2177, 0.2264, 0.2227, 0.2221, 0.2280, 0.2223, 0.2218, 0.2309])
-
-		self.weight = torch.abs(self.weight)
-		self.weight_norm = self.weight / torch.sum(self.weight)
-		self.weight = self.weight_norm.unsqueeze(1).cuda()
-		#self.weight = self.weight.unsqueeze(1).cuda()
-
-		position = torch.arange(0, max_len).float().unsqueeze(1).cuda()
-		div_term = (torch.arange(0, d_model, 2).float() * -(math.log(10000.0)/d_model)).exp().cuda()
-
-		self.pe[:, 0::2] = torch.sin(position * div_term) 
-		self.pe[:, 1::2] = torch.cos(position * div_term) 
-
-		self.pe = self.pe.unsqueeze(0)  # expand one dimention.	
-
-		self.pe = self.pe * self.weight * self.weight_var.unsqueeze(1).cuda()
-
-		# paramterize
-		self.pe = torch.nn.parameter.Parameter(self.pe.float().cuda(), requires_grad=True)
-
-	def forward(self, x):
-		return self.pe[:, :x.size(1)]
 
 # original implementaiton of positional embedding, used the same as in the BERT
-
 class PositionalEmbedding_plus(nn.Module):
-	def __init__(self, d_model, max_len=SEQ_LEN):
+	def __init__(self, d_model, max_len=21):
 		super().__init__()
 		
 		pe = torch.zeros(max_len, d_model).float()
@@ -130,7 +90,7 @@ class PositionalEmbedding_plus(nn.Module):
 # consider the relative distance in the attention module.
 ############################################################
 class Relative_PositionalEmbedding(nn.Module):
-	def __init__(self, num_units=SEQ_LEN, max_relative_position=SIDE_WINDOW_LIMIT):
+	def __init__(self, num_units=21, max_relative_position=3):
 		super().__init__()
 		self.num_units = num_units
 		self.max_relative_position = max_relative_position
@@ -182,53 +142,6 @@ class BERTEmbedding_plus(nn.Module):
 		x = self.featEmbed(sequence)  + self.position(sequence)   #+ self.segment(semgnet_label)
 		return self.dropout(x)
 
-
-class BERTEmbedding_weight(nn.Module):
-	def __init__(self, vocab_size, embed_size, dropout=0.1, inLineEmbed=True, motif_shift=0, motif_len=2):
-		super().__init__()
-
-		self.position_w = PositionalEmbedding_weight(d_model=embed_size, motif_shift=motif_shift, motif_len=motif_len)
-		self.dropout  = nn.Dropout(p=dropout)
-
-		self.featEmbed = nn.Linear(vocab_size, embed_size)
-		self.embed_size = embed_size
-		self.vocab_size = vocab_size
-
-	def forward(self, sequence):
-
-		x = self.featEmbed(sequence)  + self.position_w(sequence)
-		return self.dropout(x)
-
-# adding the weight to the feature level
-class BERTEmbedding_weight2_noused(nn.Module):
-	def __init__(self, vocab_size, embed_size, dropout=0.1, inLineEmbed=True, motif_shift=0, motif_len=2):
-		super().__init__()
-
-		self.att_center = nn.Parameter(torch.Tensor([int(SEQ_LEN/2)+motif_shift]).cuda(), requires_grad=True)
-		self.att_std    = nn.Parameter(torch.Tensor([int(motif_len/2)+1]).cuda(), requires_grad=True)
-		self.weight = positional_norm_enc(self.att_center, SEQ_LEN, self.att_std)
-
-		self.token 	  = TokenEmbedding(vocab_size=vocab_size, embed_size=embed_size)
-		self.position_w = PositionalEmbedding(d_model=self.token.embedding_dim)
-		self.segment  = SegmentEmbedding(embed_size=self.token.embedding_dim)
-		self.dropout  = nn.Dropout(p=dropout)
-
-		self.inLineEmbed = inLineEmbed
-		# replace the feature Embeding to be the linear
-		self.featEmbed = nn.Linear(vocab_size, embed_size)
-		self.embed_size = embed_size
-
-	def forward(self, sequence):
-		# testing models without positional embedding
-		if self.inLineEmbed:
-			x = self.featEmbed(sequence*self.weight)  + self.position_w(sequence)   #+ self.segment(semgnet_label)		
-
-		else:
-			x = self.token(sequence) # + self.position(sequence)     #+ self.segment(semgnet_label)
-
-		return self.dropout(x)
-
-
 ############ attention ############ 
 class Attention(nn.Module):
 
@@ -276,7 +189,7 @@ class Attention_relative(nn.Module):
 
 
 class MultiHeadedAttention_relative(nn.Module):
-	def __init__(self, h, d_model, dropout=0.1):
+	def __init__(self, h, d_model, seq_len=21, dropout=0.1):
 		super().__init__()
 
 		assert d_model % h == 0
@@ -288,9 +201,10 @@ class MultiHeadedAttention_relative(nn.Module):
 		self.attention = Attention_relative()
 		self.dropout = nn.Dropout(p=dropout)
 
+		SIDE_WINDOW_LIMIT=3
 		# original, this will not correctly show the number of parameters
-		self.r_v = Relative_PositionalEmbedding(self.d_k, SIDE_WINDOW_LIMIT)(SEQ_LEN)
-		self.r_k = Relative_PositionalEmbedding(self.d_k, SIDE_WINDOW_LIMIT)(SEQ_LEN)
+		self.r_v = Relative_PositionalEmbedding(self.d_k, SIDE_WINDOW_LIMIT)(seq_len)
+		self.r_k = Relative_PositionalEmbedding(self.d_k, SIDE_WINDOW_LIMIT)(seq_len)
 		
 		self.attn_output = None
 		
@@ -313,11 +227,11 @@ class MultiHeadedAttention_relative(nn.Module):
 ############ Transform block build ############ 
 
 class TransformerBlock_relative(nn.Module):
-	def __init__(self, hidden, attn_heads, feed_forward_hidden, dropout):
+	def __init__(self, hidden, attn_heads, feed_forward_hidden, dropout, seq_len):
 		super().__init__()
 
 		self.input_sublayer = SublayerConnection(size=hidden, dropout=dropout)
-		self.attention = MultiHeadedAttention_relative(h=attn_heads, d_model=hidden)
+		self.attention = MultiHeadedAttention_relative(h=attn_heads, d_model=hidden, seq_len=seq_len, dropout=dropout)
 		self.feed_forward = PositionwiseFeedForward(d_model=hidden, d_ff=feed_forward_hidden, dropout = dropout)
 		self.output_sublayer = SublayerConnection(size=hidden, dropout=dropout)
 		self.dropout = nn.Dropout(p=dropout)
@@ -331,7 +245,7 @@ class TransformerBlock_relative(nn.Module):
 ## BERT: bi-directional model build ##
 ######################################
 class BERT_plus(nn.Module):
-	def __init__(self, vocab_size=4, hidden=32, n_layers=3, attn_heads=1, dropout=0, motif_shift=0, motif_len=2, inLineEmbed=True, device="cuda:0"):
+	def __init__(self, vocab_size=4, hidden=32, n_layers=3, attn_heads=1, dropout=0, motif_shift=0, motif_len=2, seq_len=21, inLineEmbed=True, device="cuda:0"):
 		super().__init__()
 
 		# note the network structure is defined in the inital function
@@ -348,7 +262,7 @@ class BERT_plus(nn.Module):
 
 		# stacked transformers
 		self.transformer_blocks = nn.ModuleList(
-			[TransformerBlock_relative(hidden, attn_heads, hidden*4, dropout) for _ in range(n_layers)])
+			[TransformerBlock_relative(hidden, attn_heads, hidden*4, dropout, seq_len) for _ in range(n_layers)])
 
 		## key points to change hidden*5
 		self.linear = nn.Linear(hidden*7, 2)
@@ -370,131 +284,3 @@ class BERT_plus(nn.Module):
 		out = self.tanh(out)
 		return out
 		
-
-# 20201225 updated new position
-class BERT_position(nn.Module):
-	def __init__(self, vocab_size=4, hidden=32, n_layers=3, attn_heads=1, dropout=0, motif_shift=0, motif_len=2, inLineEmbed=True, device="cuda:0"):
-		super().__init__()
-
-		self.hidden = hidden
-		self.n_layers = n_layers
-		self.attn_heads = attn_heads
-
-		# feed forward hidden
-		self.feed_forward_hidden = hidden * 4
-
-		# embedding module
-		self.embedding = BERTEmbedding_weight(vocab_size, hidden, dropout, inLineEmbed)
-		self.device = device
-
-		# stacked transformers
-		self.transformer_blocks = nn.ModuleList(
-			[TransformerBlock_relative(hidden, attn_heads, hidden*4, dropout) for _ in range(n_layers)])
-
-		self.linear = nn.Linear(hidden, 2)
-
-	def forward(self, x, segment_info=None):
-
-		x = self.embedding(x)
-		mask = None
-		
-		for transformer in self.transformer_blocks:
-			x = transformer.forward(x, mask)
-
-		out = self.linear(x[:, int(x.size(1)/2), :])
-
-		return out.to(self.device)
-
-############### followng modules are under-testing #################
-## not used in the current stage
-class BERT_plus_rnn(nn.Module):
-	def __init__(self, vocab_size=4, hidden=32, n_layers=3, attn_heads=1, dropout=0, inLineEmbed=True, device="cuda:0"):
-		super().__init__()
-
-		self.hidden = hidden
-		self.n_layers = n_layers
-		self.attn_heads = attn_heads
-		self.feed_forward_hidden = hidden * 4
-		self.embedding = BERTEmbedding_weight(vocab_size, hidden, dropout, inLineEmbed)
-		self.device = device
-
-		# stacked transformers
-		self.transformer_blocks = nn.ModuleList(
-			[TransformerBlock_relative(hidden, attn_heads, hidden*4, dropout) for _ in range(n_layers)])
-
-		self.linear = nn.Linear(hidden*2, 2)
-		self.inLineEmbed = inLineEmbed
-
-		self.fc0 = nn.Linear(hidden, 32)
-		self.fc1 = nn.Linear(32, 2)
-
-		self.fc_midRound = nn.Linear(hidden*5, 2)
-
-		self.lstm = nn.LSTM(hidden, hidden, 1, batch_first=True, bidirectional=True)
-
-	def forward(self, x, segment_info=None):
-
-		# previous embedding approach
-		x = self.embedding(x)
-		mask = None
-
-		for transformer in self.transformer_blocks:
-			x = transformer.forward(x, mask)
-
-		h0 = torch.zeros(1*2, x.size(0), self.hidden).to(self.device)
-		c0 = torch.zeros(1*2, x.size(0), self.hidden).to(self.device)
-
-		x, _ = self.lstm(x, (h0,c0))
-	
-		#2. direct output without relu
-		out = self.linear(x[:, int(x.size(1)/2), :])
-
-		return out
-
-
-class BERT_plus_rnn2(nn.Module):
-	def __init__(self, vocab_size=4, hidden=32, n_layers=3, attn_heads=1, dropout=0, inLineEmbed=True, device="cuda:0"):
-		super().__init__()
-
-		self.hidden = hidden
-		self.n_layers = n_layers
-		self.attn_heads = attn_heads
-		self.feed_forward_hidden = hidden * 4
-		self.embedding = BERTEmbedding(vocab_size, hidden, dropout, inLineEmbed)
-		self.device = device
-
-		# stacked transformers
-		self.transformer_blocks = nn.ModuleList(
-			[TransformerBlock_relative(hidden, attn_heads, hidden*4, dropout) for _ in range(n_layers)])
-
-		self.linear = nn.Linear(hidden*2, 2)
-		self.inLineEmbed = inLineEmbed
-
-		self.fc0 = nn.Linear(hidden, 32)
-		self.fc1 = nn.Linear(32, 2)
-
-		self.fc_midRound = nn.Linear(hidden*5, 2)
-
-		self.lstm1 = nn.LSTM(vocab_size, int(hidden/2), 1, batch_first=True, bidirectional=True)
-		self.lstm2 = nn.LSTM(hidden,     hidden, 1, batch_first=True, bidirectional=True)
-
-	def forward(self, x, segment_info=None):
-
-		mask = None
-	
-		h00 = torch.zeros(1*2, x.size(0), int(self.hidden/2)).to(self.device)
-		c00 = torch.zeros(1*2, x.size(0), int(self.hidden/2)).to(self.device)
-		x, _ = self.lstm1(x, (h00,c00))
-
-		# using the rnn-embedding approach
-		for transformer in self.transformer_blocks:
-			x = transformer.forward(x, mask)
-
-		h01 = torch.zeros(1*2, x.size(0), self.hidden).to(self.device)
-		c01 = torch.zeros(1*2, x.size(0), self.hidden).to(self.device)
-
-		x, _ = self.lstm2(x, (h01,c01))
-		out = self.linear(x[:, int(x.size(1)/2), :])
-
-	
-		return out

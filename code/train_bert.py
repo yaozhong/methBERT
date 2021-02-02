@@ -18,7 +18,7 @@ import torch.optim as optim
 
 MIN_EPOCH=5
 
-def train_bert_plus(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, use_sim=False, m_shift=0, m_len=2, useSEQ=True, plotCurve=True):
+def train_bert_plus(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, use_sim=False, m_shift=0, m_len=2, w_len=21, useSEQ=True, plotCurve=True):
 	
 	train_start = time.time()
 	train_generator, test_generator, val_generator = data_split
@@ -28,14 +28,8 @@ def train_bert_plus(data_split, model, model_save_path, learn_rate, gpuID, epoch
 	#print(" |- Motif [shift=%d, len=%d]" %(m_shift, m_len))
 
 	# loading DL models
-	bert = BERT_plus(vocab_size=7, hidden=100, n_layers=3, attn_heads=4, dropout=0, motif_shift=m_shift, motif_len=m_len).float()
+	bert = BERT_plus(vocab_size=7, hidden=100, n_layers=3, attn_heads=4, dropout=0, motif_shift=m_shift, motif_len=m_len, seq_len=w_len).float()
 
-	# display model parameters
-	#summary(bert, (21, 7), -1)
-
-	# basic module
-	# bert = BERT_plus(vocab_size=7, hidden=128, n_layers=3, attn_heads=4, dropout=0).float()
-	
 	bert.to(device)
 
 	if len(gpuID) > 1 and torch.cuda.device_count() > 1:
@@ -149,8 +143,6 @@ def train_bert_basic(data_split, model, model_save_path, learn_rate, gpuID, epoc
 	#bert = BERT(vocab_size=7, hidden=128, n_layers=3, attn_heads=4, dropout=0).float()
 	bert = BERT(vocab_size=7, hidden=100, n_layers=3, attn_heads=4, dropout=0).float()
 	#bert = BERT(vocab_size=7, hidden=1024, n_layers=8, attn_heads=512, dropout=0).float()
-
-	summary(bert, (21, 7), -1)
 
 	bert.to(device)
 	if len(gpuID) > 1 and torch.cuda.device_count() > 1:
@@ -367,7 +359,7 @@ if __name__ == "__main__":
 		train_bert_basic(data_split, args.model, args.model_dir, args.lr, gpu_list, args.epoch, args.use_sim)
 
 	if args.model == "BERT_plus":
-		train_bert_plus(data_split, args.model, args.model_dir, args.lr, gpu_list, args.epoch, args.use_sim, args.m_shift, len(args.motif))
+		train_bert_plus(data_split, args.model, args.model_dir, args.lr, gpu_list, args.epoch, args.use_sim, args.m_shift, len(args.motif), args.w_len)
 
 
 

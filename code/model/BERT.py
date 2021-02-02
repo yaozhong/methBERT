@@ -4,7 +4,6 @@ import torch, math
 import torch.nn as nn
 import torch.nn.functional as F
 
-SEQ_LEN=21
 
 ### basic modules ###
 class GELU(nn.Module):
@@ -49,7 +48,7 @@ class PositionwiseFeedForward(nn.Module):
 #  Embedding 
 ###################################
 class PositionalEmbedding(nn.Module):
-	def __init__(self, d_model, max_len=SEQ_LEN):
+	def __init__(self, d_model, max_len=21):
 		super().__init__()
 
 		# todo: revise the position to be learnable, first revise the BERT_plus.
