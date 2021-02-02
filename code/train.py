@@ -12,7 +12,6 @@ from model.simple_CNN import *
 from model.RNN import *
 from torch.utils.data import Dataset, DataLoader
 import torch.optim as optim
-from torchsummary import summary
 
 from eval import evaluate_signal, evaluate_event, evaluate_unseg_seq, evaluate_event_for_GANsim
 from detect import detection, fix_model_state_dict
@@ -39,13 +38,7 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 	else:
 		net = globals()[model](device, input_size=3).float()
 
-	summary(net, (1, 21, 7), -1)
-
 	net.to(device)
-
-	# not work right now, using the print(model) for the replacement, which is works fine
-	#summary(net, (21, 7), -1)
-	#print(net)
 
 	generator = None
 
@@ -225,7 +218,7 @@ if __name__ == "__main__":
 	parser.add_argument('--dataset',   default="",         type=str, required=True,  help='dataset name')
 	parser.add_argument('--dataset_extra', default="",     type=str, required=False, help='Additional data tag')
 
-	parser.add_argument('--positive_control_dataPath',   default="", type=str, required=True,  help='positive control fast5 dataPath')
+	parser.add_argument('--positive_control_dataPath',   default="", type=str, required=False,  help='positive control fast5 dataPath')
 	parser.add_argument('--negative_control_dataPath',   default="", type=str, required=False, help='negative control fast5 dataPath')
 
 	parser.add_argument('--motif',     default="CG",       type=str, required=True,  help='motif lists, currently one Motif type only')

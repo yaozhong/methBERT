@@ -15,7 +15,6 @@ import torch.optim as optim
 
 from eval import evaluate_signal, evaluate_event, evaluate_single, evaluate_unseg_seq, evaluate_print
 from collections import OrderedDict
-from torchsummary import summary
 
 ## correct the multi-gpu model saving issue ##
 def fix_model_state_dict(state_dict):

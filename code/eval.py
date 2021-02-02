@@ -5,11 +5,11 @@ import torch.nn.functional as F
 import time,tqdm,os,math
 from sklearn.metrics import roc_curve, auc, roc_auc_score, f1_score, accuracy_score, confusion_matrix, matthews_corrcoef
 import numpy as np
-from model.siamese_triplet import triplet_data_gen
+
 from dataProcess.visual_util import tSNE_plot
 from dataProcess.data_loading import *
 from dataProcess.ref_util import *
-from torchsummary import summary
+
 import time
 
 cn_dic = {'0':'A', '1':'T', '2':'G','3':'C', '4':'N'}
@@ -786,12 +786,7 @@ def evaluate_validate_triplet(net, criterion, device, val_generator, useSEQ, use
 				print(" |= tn=%d, fp=%d, fn=%d, tp=%d" %(tn, fp, fn, tp))
 				print(" |= AUC=%.4f, Precision=%.4f, Recall=%.4f" %(auc_score, precision, recall))
 				print(" |= ACC=%.4f, F1=%.4f, MCC=%.4f" %(acc, f1, mcc))
-
-				
-
-		#  all loading for 
-		#seq_group_dataloder = triplet_data_gen(seq_group_data, device)
-		#n_sample = len(seq_group_dataloder)
+			
 
 		# new batch loading 
 		print(" + [inside]: Generate dataloading ...")

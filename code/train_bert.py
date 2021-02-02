@@ -16,11 +16,7 @@ from detect import detection, fix_model_state_dict
 from torch.utils.data import Dataset, DataLoader
 import torch.optim as optim
 
-from torch_lr_finder import LRFinder
-from torchsummary import summary
-
 MIN_EPOCH=5
-
 
 def train_bert_plus(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, use_sim=False, m_shift=0, m_len=2, useSEQ=True, plotCurve=True):
 	
@@ -35,11 +31,10 @@ def train_bert_plus(data_split, model, model_save_path, learn_rate, gpuID, epoch
 	bert = BERT_plus(vocab_size=7, hidden=100, n_layers=3, attn_heads=4, dropout=0, motif_shift=m_shift, motif_len=m_len).float()
 
 	# display model parameters
-	#print(bert)
-	summary(bert, (21, 7), -1)
+	#summary(bert, (21, 7), -1)
 
 	# basic module
-	#bert = BERT_plus(vocab_size=7, hidden=128, n_layers=3, attn_heads=4, dropout=0).float()
+	# bert = BERT_plus(vocab_size=7, hidden=128, n_layers=3, attn_heads=4, dropout=0).float()
 	
 	bert.to(device)
 
@@ -50,11 +45,6 @@ def train_bert_plus(data_split, model, model_save_path, learn_rate, gpuID, epoch
 	criterion = nn.CrossEntropyLoss()
 	optimizer = optim.Adam(bert.parameters(), lr=learn_rate)
 
-	#optimizer = optim.Adam(bert.parameters(), lr=1e-3)
-	#optim_schedule = ScheduledOptim(optimizer, 128, n_warmup_steps=2)
-	#optimizer = optim.Adam(bert.parameters(), lr=1e-3)
-	#optimizer = Lamb(bert.parameters(), lr=0.0025, weight_decay=0.01, betas=(.9, .999), adam=True)
-    #writer = SummaryWriter()
 
 	print(" |- Total Model Parameters:", sum([p.nelement() for p in bert.parameters()]))
 	print(" |- Start =BERT_plus(relative poisitional embedding)= training with [lr=%.5f]..." %(learn_rate))
@@ -272,7 +262,7 @@ if __name__ == "__main__":
 	parser.add_argument('--dataset',   default="",       type=str, required=True, help='dataset name')
 	parser.add_argument('--dataset_extra', default="",     type=str, required=False, help='Additional data tag')
 	
-	parser.add_argument('--positive_control_dataPath',   default="", type=str, required=True,  help='positive control fast5 dataPath')
+	parser.add_argument('--positive_control_dataPath',   default="", type=str, required=False,  help='positive control fast5 dataPath')
 	parser.add_argument('--negative_control_dataPath',   default="", type=str, required=False, help='negative control fast5 dataPath')
 
 	parser.add_argument('--motif',     default="CG",     type=str, required=True, help='motif lists, currently one Motif type only')
