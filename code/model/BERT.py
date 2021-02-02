@@ -128,8 +128,6 @@ class MultiHeadedAttention(nn.Module):
 		self.attention = Attention()
 		self.dropout = nn.Dropout(p=dropout)
 
-		#self.lstm = nn.LSTM(vocab_size, int(hidden/2), 1, batch_first=True, bidirectional=True)
-		#self.attn_output = None
 
 	def forward(self, query, key, value, mask=None):
 		batch_size = query.size(0)
@@ -140,9 +138,6 @@ class MultiHeadedAttention(nn.Module):
 		x, attn = self.attention(query, key, value, mask=mask, dropout=self.dropout)
 		x = x.transpose(1,2).contiguous().view(batch_size, -1, self.h * self.d_k)
 
-		# add the additional one
-		#self.attn_output = attn
-
 		return self.output_linear(x)
 
 ############ Transform block build ############ 
@@ -150,7 +145,8 @@ class MultiHeadedAttention(nn.Module):
 class TransformerBlock(nn.Module):
 	def __init__(self, hidden, attn_heads, feed_forward_hidden, dropout):
 		super().__init__()
-		self.attention = MultiHeadedAttention(h=attn_heads, d_model=hidden)
+
+		self.attention = MultiHeadedAttention(h=attn_heads, d_model=hidden, dropout = dropout)
 		self.feed_forward = PositionwiseFeedForward(d_model=hidden, d_ff=feed_forward_hidden, dropout = dropout)
 		self.input_sublayer = SublayerConnection(size=hidden, dropout=dropout)
 		self.output_sublayer = SublayerConnection(size=hidden, dropout=dropout)
