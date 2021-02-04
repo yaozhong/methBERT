@@ -1,10 +1,16 @@
-# BERT model for nanopore methylation detection
-
+# BERT models for nanopore methylation detection
 
 ![](figures/BERT_model_refined.png)
 
+Here, we explore the non-recurrent modeling approach for nanopore methylation detection based on the bidirectional encoder representations from transformers (BERT).
+We use two types of BERTs: the basic one [Devlin et al.] and refined one.
+The refined BERT is refined with learnable postional embedding, self-attetion with realtive postion representation [Shaw et al.], 
+and center postitions concatenation for the output layer.
+The BERT model structures are briefly described in the above figure. 
+
+
 ## Docker enviroment
-We provide a docker image for running this code
+We provide a docker image for running this source code
 ```
 docker pull yaozhong/ont_methylation:0.6
 ```
@@ -44,3 +50,14 @@ time python detect.py --model ${MODEL} --model_dir ${MODEL_PATH} \
 --gpu cuda:0  --fast5_fold FAST5_FOLD --num_worker 12 \
 --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --evalMode test_mode --w_len ${W_LEN} --ref_genome ${REF} --output_file OUTPUT
 ```
+
+## Avaialbe benchmark dataset
+
+## Acknowledge
+This source code refers or use functions from the follow github projects:
+- DeepMOD      [https://github.com/WGLab/DeepMod]
+- DeepSignal   [https://github.com/bioinfomaticsCSU/deepsignal]
+- BERT-pytorch [https://github.com/codertimo/BERT-pytorch]
+
+
+
