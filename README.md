@@ -21,16 +21,13 @@ nvidia-docker run -it --shm-size=64G -v LOCAL_DATA_PATH:MOUNT_DATA_PATH yaozhong
 N_EPOCH=50
 W_LEN=21
 LR=1e-4
-
 MODEL="biRNN_basic" ("BERT", "BERT_plus")
+MOTIF="CG"
+NUCLEOTIDE_LOC_IN_MOTIF=0
 
-# the following variables provide the data information
-DATA="stoiber_ecoli"
-DATA_EXTRA="M_Hhal_gCgc"
-
-python3 train.py --model $MODEL  --model_dir ${MODEL_PATH} --gpu cuda:0 --epoch ${N_EPOCH} \
- --dataset $DATA --dataset_extra $DATA_EXTRA --motif GCGC --m_shift 1 --w_len ${W_LEN} --lr $LR  
-
+python3 train.py --model ${MODEL}  --model_dir MODEL_SAVE_PATH --gpu cuda:0 --epoch ${N_EPOCH} \
+ --positive_control_dataPath POSITIVE_SAMPLE_PATH   --negative_control_dataPath NEGATIVE_SAMPLE_PATH \
+ --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR 
 ```
 
 ## Detection
@@ -38,16 +35,12 @@ python3 train.py --model $MODEL  --model_dir ${MODEL_PATH} --gpu cuda:0 --epoch 
 N_EPOCH=50
 W_LEN=21
 LR=1e-4
-
-DATA="stoiber_ecoli"
-DATA_EXTRA="M_Sssl_Cg"
-
 MODEL="BERT_plus" 
 REF="data/ref/ecoli_k12.fasta"
-FAST5_FOLD="data/Simpson/benchmark/dataset1/10"
+MOTIF="CG"
+NUCLEOTIDE_LOC_IN_MOTIF=0
 
-time python detect.py --model $MODEL --model_dir $MODEL_PATH \
---gpu cuda:0 --dataset $DATA --dataset_extra $DATA_EXTRA  \
---fast5_fold $FAST5_FOLD --num_worker 24 \
---motif CG --m_shift 0 --evalMode test_mode --w_len 21 --ref_genome $REF --output_file $OUTPUT
+time python detect.py --model ${MODEL} --model_dir ${MODEL_PATH} \
+--gpu cuda:0  --fast5_fold FAST5_FOLD --num_worker 12 \
+--motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --evalMode test_mode --w_len ${W_LEN} --ref_genome ${REF} --output_file OUTPUT
 ```
