@@ -1,13 +1,14 @@
-# BERT models for nanopore methylation detection
+# On the application of BERT models for nanopore methylation detection
 
 ![](figures/BERT_model_refined.png)
 
 Here, we explore the non-recurrent modeling approach for nanopore methylation detection based on the bidirectional encoder representations from transformers (BERT).
+Compared with the state-of-the-art model with bi-directional recurrent neural networks (RNN), BERT can provide a faster model inference solution without the limit of
+sequential computation.
 We use two types of BERTs: the basic one [Devlin et al.] and refined one.
-The refined BERT is refined with learnable postional embedding, self-attetion with realtive postion representation [Shaw et al.], 
-and center postitions concatenation for the output layer.
-The BERT model structures are briefly described in the above figure. 
-
+The refined BERT is refined according to the task-specific features and is featured with learnable postional embedding, 
+self-attetion with realtive postion representation [Shaw et al.], and center postitions concatenation for the output layer.
+The model structures are briefly described in the above figure. 
 
 ## Docker enviroment
 We provide a docker image for running this source code
@@ -53,11 +54,17 @@ time python detect.py --model ${MODEL} --model_dir ${MODEL_PATH} \
 
 ## Avaialbe benchmark dataset
 
+We test models on 5mC and 6mA dataset sequenced with Nanopore R9 flow cells, 
+which is commonly used as the benchmark data in the previous work.
+
+The fast5 reads are supposed to be pre-processed with re-squggle ([Tombo](https://github.com/nanoporetech/tombo)) 
+
+
 ## Acknowledge
 This source code refers or use functions from the follow github projects:
-- DeepMOD      [https://github.com/WGLab/DeepMod]
-- DeepSignal   [https://github.com/bioinfomaticsCSU/deepsignal]
-- BERT-pytorch [https://github.com/codertimo/BERT-pytorch]
+- [DeepMOD](https://github.com/WGLab/DeepMod)
+- [DeepSignal](https://github.com/bioinfomaticsCSU/deepsignal)
+- [BERT-pytorch](https://github.com/codertimo/BERT-pytorch)
 
 
 
