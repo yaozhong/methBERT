@@ -7,9 +7,10 @@ Compared with the state-of-the-art model with bi-directional recurrent neural ne
 sequential computation.
 We use two types of BERTs: the basic one [Devlin et al.] and refined one.
 The refined BERT is refined according to the task-specific features and is featured with 
-- learnable postional embedding, 
+
+- learnable postional embedding
 - self-attetion with realtive postion representation [Shaw et al.]
-- center postitions concatenation for the output layer.
+- center postitions concatenation for the output layer
 
 The model structures are briefly described in the above figure. 
 
