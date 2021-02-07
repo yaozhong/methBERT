@@ -40,8 +40,8 @@ python3 train_biRNN.py --model ${MODEL}  --model_dir MODEL_SAVE_PATH --gpu cuda:
  --positive_control_dataPath POSITIVE_SAMPLE_PATH   --negative_control_dataPath NEGATIVE_SAMPLE_PATH \
  --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR 
 
-MODEL="BERT_plus" (option: "BERT", "BERT_plus")
  # training bert models
+MODEL="BERT_plus" (option: "BERT", "BERT_plus")
 python3 train_bert.py --model ${MODEL}  --model_dir MODEL_SAVE_PATH --gpu cuda:0 --epoch ${N_EPOCH} \
  --positive_control_dataPath POSITIVE_SAMPLE_PATH   --negative_control_dataPath NEGATIVE_SAMPLE_PATH \
  --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR 
