@@ -284,7 +284,7 @@ if __name__ == "__main__":
 			print("[Error!] Please assign the corrected methyltation data name for the stoiber data-set")
 
 	# add direction path information
-	if args.dataset == "" and dataset_extra =="":
+	if args.dataset == "" and args.dataset_extra =="":
 
 		if args.positive_control_dataPath == "" or args.negative_control_dataPath == "":
 			print("[Data Error]: Please cheching the positive/negative fast5 data path!")
