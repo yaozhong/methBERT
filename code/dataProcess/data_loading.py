@@ -405,7 +405,7 @@ def load_from_single_folds(fold_path, num_worker, label=1, b_size=20, motif=["CG
 	random_seed = 123
 	torch.manual_seed(random_seed)
 
-	print(" |- Loading single fold data with label-[%d] ..." %(label))
+	#print(" |- Loading single fold data with label-[%d] ..." %(label))
 
 	data_set  = MethylDataSet(get_fast5s(fold_path), label, motif, m_shift, w_len)
 	generator = DataLoader(data_set, batch_size=b_size, shuffle=False, num_workers=num_worker, collate_fn=collate_fn)

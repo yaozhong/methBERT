@@ -534,7 +534,7 @@ def evaluate_print(net, criterion, device, val_generator, useSEQ,  ref_genome, o
 		#print("== Total test input-instance [%d]" %(n_sample))
 		f.close()
 
-		print("ACC is", accuracy/n_sample)
+		#print("ACC is", accuracy/n_sample)
 		print("*Deocding time is ", total_decode_time)
 
 

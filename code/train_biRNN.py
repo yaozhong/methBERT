@@ -167,38 +167,6 @@ if __name__ == "__main__":
 
 	print("\n[+] Methylation %s-motif Model Training for %d-th position [%s] of nanopore fast5 data ..." %("".join(motif), args.m_shift, motif[0][args.m_shift]))
 	
-	home_path="/nanopore"
-	
-	# simpson dataset 
-	if args.dataset == "simpson_ecoli":
-		meth_fold_path = home_path + "/data/dev/ecoli_er2925.pcr_MSssI.r9.timp.061716.fast5/pass"
-		pcr_fold_path  = home_path + "/data/dev/ecoli_er2925.pcr.r9.timp.061716.fast5/pass"	
-
-	if args.dataset == "simpson_human":
-		meth_fold_path = home_path + "/data/dev/NA12878.pcr_MSssI.r9.timp.081016.fast5/pass"
-		pcr_fold_path  = home_path + "/data/dev/NA12878.pcr.r9.timp.081016.fast5/pass"	
-
-	if args.dataset == "stoiber_ecoli":
-		## pcr part is all the same.
-		pcr_fold_path  = home_path + "/data/Stoiber/5mC/Control"
-
-		if args.dataset_extra == "M_Hhal_gCgc":
-			meth_fold_path = home_path + "/data/Stoiber/5mC/M_Hhal_gCgc"
-		elif args.dataset_extra == "M_Mpel_Cg":
-			meth_fold_path = home_path + "/data/Stoiber/5mC/M_Mpel_Cg"
-		elif args.dataset_extra == "M_Sssl_Cg":
-			meth_fold_path = home_path + "/data/Stoiber/5mC/M_Sssl_Cg"
-
-		# add the 6mA data loading part
-		elif args.dataset_extra == "M_EcoRI_gaAttc":
-			meth_fold_path = home_path + "/data/Stoiber/6mA/M_EcoRI_gaAttc"
-		elif args.dataset_extra == "M_TaqI_tcgA":
-			meth_fold_path = home_path + "/data/Stoiber/6mA/M_TaqI_tcgA"
-		elif args.dataset_extra == "M_dam_gAtc":
-			meth_fold_path = home_path + "/data/Stoiber/6mA/M_dam_gAtc"
-		elif args.dataset != "" and dataset_extra !="":
-			print("[Error!] Please assign the corrected methyltation data name for the stoiber data-set")
-	
 	# add direction path information
 	if args.dataset == "" and args.dataset_extra =="":
 
