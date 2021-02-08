@@ -223,7 +223,7 @@ if __name__ == "__main__":
 	parser.add_argument('--model_dir', action="store",   type=str, required=True,  help="directory for saving the trained model.")
 	parser.add_argument('--gpu',       default="cuda:0", type=str, required=False, help='GPU Device(s) used for training')
 	parser.add_argument('--epoch',     default=50,       type=int, required=False, help='Training epcohs')
-	parser.add_argument('--dataset',   default="",       type=str, required=True, help='dataset name')
+	parser.add_argument('--dataset',   default="",       type=str, required=False, help='dataset name')
 	parser.add_argument('--dataset_extra', default="",     type=str, required=False, help='Additional data tag')
 	
 	parser.add_argument('--positive_control_dataPath',   default="", type=str, required=False,  help='positive control fast5 dataPath')
