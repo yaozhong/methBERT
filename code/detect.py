@@ -101,8 +101,6 @@ if __name__ == "__main__":
 	parser.add_argument('--model',     default='biRNN_basic',    type=str, required=True,  help="DL models used for the training.")
 	parser.add_argument('--model_dir', action="store",     type=str, required=True,  help="directory for saving the trained model.")
 	parser.add_argument('--gpu',       default="cuda:0",   type=str, required=False, help='GPU Device(s) used for training')
-	parser.add_argument('--dataset',   default="",         type=str, required=True,  help='dataset name')
-	parser.add_argument('--dataset_extra', default="",     type=str, required=False, help='Additional data tag')
 	parser.add_argument('--motif',     default="CG",       type=str, required=True,  help='motif lists, currently one Motif type only')
 	parser.add_argument('--m_shift',   default=0,          type=int, required=False, help='Methylation target local start position')
 	parser.add_argument('--evalMode',  default="test_mode",     type=str, required=False, help='Evluation mode, [test_mode/motif_only, both]')
@@ -125,21 +123,6 @@ if __name__ == "__main__":
 	motif = [item.upper() for item in args.motif.split(',')]
 
 	print("[+] Detecting methylation %s-motif with for %d-th position [%s] for nanopore fast5 data ..." %("".join(motif), args.m_shift, motif[0][args.m_shift]))
-
-	if args.dataset == "simpson_ecoli":
-		meth_fold_path = "/home/yaozhong/working/2_nanopore/methylation/data/dev/ecoli_er2925.pcr_MSssI.r9.timp.061716.fast5/pass"
-		pcr_fold_path  = "/home/yaozhong/working/2_nanopore/methylation/data/dev/ecoli_er2925.pcr.r9.timp.061716.fast5/pass"	
-
-	if args.dataset == "stoiber_ecoli":
-		pcr_fold_path  = "/home/yaozhong/working/2_nanopore/methylation/data/Stoiber/5mC/Control"
-		if args.dataset_extra == "M_Hhal_gCgc":
-			meth_fold_path = "/home/yaozhong/working/2_nanopore/methylation/data/Stoiber/5mC/M_Hhal_gCgc"
-		elif args.dataset_extra == "M_Mpel_Cg":
-			meth_fold_path = "/home/yaozhong/working/2_nanopore/methylation/data/Stoiber/5mC/M_Mpel_Cg"
-		elif args.dataset_extra == "M_Sssl_Cg":
-			meth_fold_path = "/home/yaozhong/working/2_nanopore/methylation/data/Stoiber/5mC/M_Sssl_Cg"
-		else:
-			print("[Error!] Please assign the corrected methyltation data name for the stoiber data-set")
 
 	if args.fast5_fold != "":
 		meth_fold_path = args.fast5_fold
