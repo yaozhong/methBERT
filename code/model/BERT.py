@@ -9,8 +9,6 @@ import torch.nn.functional as F
 class GELU(nn.Module):
 	def forward(self, x):
 		return 0.5 * x * (1+torch.tanh(math.sqrt(2 / math.pi) *(x + 0.044715 * torch.pow(x, 3)))) 
-		# 20200522 testing
-		# return F.relu(x)
 		
 class LayerNorm(nn.Module):
 	def __init__(self, features, eps=1e-6):
@@ -146,7 +144,7 @@ class TransformerBlock(nn.Module):
 	def __init__(self, hidden, attn_heads, feed_forward_hidden, dropout):
 		super().__init__()
 
-		self.attention = MultiHeadedAttention(h=attn_heads, d_model=hidden, 0.1)
+		self.attention = MultiHeadedAttention(h=attn_heads, d_model=hidden, dropout=0.1)
 		self.feed_forward = PositionwiseFeedForward(d_model=hidden, d_ff=feed_forward_hidden, dropout = dropout)
 		self.input_sublayer = SublayerConnection(size=hidden, dropout=dropout)
 		self.output_sublayer = SublayerConnection(size=hidden, dropout=dropout)
