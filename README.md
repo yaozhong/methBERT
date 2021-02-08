@@ -76,8 +76,8 @@ which is commonly used as the benchmark data in the previous work.
 The fast5 reads are supposed to be pre-processed with re-squggle ([Tombo](https://github.com/nanoporetech/tombo)) 
 
 ### Reference genome
-- E.coli, K-12 sub-strand MG1655
-- H.sapien, GRCh38
+- E.coli: K-12 sub-strand MG1655
+- H.sapiens: GRCh38
 
 
 ## Reference
