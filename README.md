@@ -48,6 +48,9 @@ python3 train_bert.py --model ${MODEL}  --model_dir MODEL_SAVE_PATH --gpu cuda:0
 ```
 
 ## Detection
+
+We provided independent trained models on each 5mC and 6mA datasets of different motifs and methyltransferases in the ./trained_model fold.
+
 ```
 N_EPOCH=50
 W_LEN=21
