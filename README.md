@@ -78,7 +78,7 @@ NC_000913.3     4581862 +       4581862 43ea7b03-8d2b-4df3-b395-536b41872137    
 ```
 
 
-## Avaialbe benchmark dataset
+## Available benchmark dataset
 
 We test models on 5mC and 6mA dataset sequenced with Nanopore R9 flow cells, 
 which is commonly used as the benchmark data in the previous work.
