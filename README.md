@@ -34,16 +34,19 @@ LR=1e-4
 MODEL="biRNN_basic"
 MOTIF="CG"
 NUCLEOTIDE_LOC_IN_MOTIF=0
+POSITIVE_SAMPLE_PATH=<methylated fast5 path>
+NEGATIVE_SAMPLE_PATH=<unmethylated fast5 path>
+MODEL_SAVE_PATH=<model saved path>
 
 # training biRNN model
-python3 train_biRNN.py --model ${MODEL}  --model_dir MODEL_SAVE_PATH --gpu cuda:0 --epoch ${N_EPOCH} \
- --positive_control_dataPath POSITIVE_SAMPLE_PATH   --negative_control_dataPath NEGATIVE_SAMPLE_PATH \
+python3 train_biRNN.py --model ${MODEL}  --model_dir ${MODEL_SAVE_PATH} --gpu cuda:0 --epoch ${N_EPOCH} \
+ --positive_control_dataPath ${POSITIVE_SAMPLE_PATH}   --negative_control_dataPath ${NEGATIVE_SAMPLE_PATH} \
  --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR 
 
- # training bert models
+# training bert models
 MODEL="BERT_plus" (option: "BERT", "BERT_plus")
 python3 train_bert.py --model ${MODEL}  --model_dir MODEL_SAVE_PATH --gpu cuda:0 --epoch ${N_EPOCH} \
- --positive_control_dataPath POSITIVE_SAMPLE_PATH   --negative_control_dataPath NEGATIVE_SAMPLE_PATH \
+ --positive_control_dataPath ${POSITIVE_SAMPLE_PATH}   --negative_control_dataPath ${NEGATIVE_SAMPLE_PATH} \
  --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR 
 ```
 
@@ -52,18 +55,19 @@ python3 train_bert.py --model ${MODEL}  --model_dir MODEL_SAVE_PATH --gpu cuda:0
 We provided independent trained models on each 5mC and 6mA datasets of different motifs and methyltransferases in the ./trained_model fold.
 
 ```
-N_EPOCH=50
-W_LEN=21
-LR=1e-4
 MODEL="BERT_plus" 
+MODEL_SAVE_PATH=<model saved path>
 REF="data/ref/ecoli_k12.fasta"
-MOTIF="CG"
-NUCLEOTIDE_LOC_IN_MOTIF=0
+FAST5_FOLD=<fast5 files to be analyzed>
+OUTPUT=<output file>
 
-time python detect.py --model ${MODEL} --model_dir ${MODEL_PATH} \
---gpu cuda:0  --fast5_fold FAST5_FOLD --num_worker 12 \
---motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --evalMode test_mode --w_len ${W_LEN} --ref_genome ${REF} --output_file OUTPUT
+time python detect.py --model ${MODEL} --model_dir ${MODEL_SAVE_PATH} \
+--gpu cuda:0  --fast5_fold ${FAST5_FOLD} --num_worker 12 \
+--motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --evalMode test_mode --w_len ${W_LEN} --ref_genome ${REF} --output_file ${OUTPUT}
 ```
+
+We generate the same output format as deepSignal.
+
 
 ## Avaialbe benchmark dataset
 
@@ -74,6 +78,9 @@ which is commonly used as the benchmark data in the previous work.
 - Simpson's dataset, https://www.nature.com/articles/nmeth.4184
 
 The fast5 reads are supposed to be pre-processed with re-squggle ([Tombo](https://github.com/nanoporetech/tombo)) 
+```
+tombo resquiggle --dna $FAST5_FOLD $REF --processes 24 --corrected-group RawGenomeCorrected_001 --basecall-group Basecall_1D_000 
+```
 
 ### Reference genome
 - E.coli: K-12 sub-strand MG1655
