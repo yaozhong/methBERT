@@ -59,9 +59,6 @@ def train_bert_plus(data_split, model, model_save_path, learn_rate, gpuID, epoch
 		bert.train()
 		running_loss, epoch_loss = 0.0, 0.0
 
-		#print("=== Epoch-[%d] Prior parameter [loc_mean=%.4f, std=%.4f]===" %(epoch,bert.embedding.position_w.att_center.item(), bert.embedding.position_w.att_std.item()))
-		#print("=== Epoch-[%d] Prior parameter [beta a=%.4f, b=%.4f]===" %(epoch,bert.embedding.att_center.item(), bert.embedding.att_std.item()))
-
 		for i, data in enumerate(train_generator, 0):
 			inputs, labels = data
 			if len(labels) == 0: continue
@@ -80,13 +77,8 @@ def train_bert_plus(data_split, model, model_save_path, learn_rate, gpuID, epoch
 			#loss = criterion(outputs, labels.to(device).unsqueeze(1).type_as(outputs))	
 			loss = criterion(outputs, labels.to(device).long())
 
-			#loss.backward()
-			## this issue to be solved or else it could be very slow
 			loss.backward(retain_graph=True)
 			optimizer.step()
-			
-			## add the learning rate update schedule
-			#optim_schedule.step_and_update_lr()
 
 			# print statistics
 			running_loss += loss.item()
@@ -128,7 +120,6 @@ def train_bert_plus(data_split, model, model_save_path, learn_rate, gpuID, epoch
 		plot_curve(train_loss_record, validate_loss_record, model, model_save_path+"_curve.png")
 
 
-# 2020-06-22 re-checking the model
 def train_bert_basic(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, use_sim=False, useSEQ=True, plotCurve=True):
 
 	train_start = time.time()
@@ -140,9 +131,7 @@ def train_bert_basic(data_split, model, model_save_path, learn_rate, gpuID, epoc
 
 	# loading DL models
 	# previous basic model
-	#bert = BERT(vocab_size=7, hidden=128, n_layers=3, attn_heads=4, dropout=0).float()
 	bert = BERT(vocab_size=7, hidden=100, n_layers=3, attn_heads=4, dropout=0).float()
-	#bert = BERT(vocab_size=7, hidden=1024, n_layers=8, attn_heads=512, dropout=0).float()
 
 	bert.to(device)
 	if len(gpuID) > 1 and torch.cuda.device_count() > 1:
@@ -150,28 +139,11 @@ def train_bert_basic(data_split, model, model_save_path, learn_rate, gpuID, epoc
 		bert = nn.DataParallel(bert, device_ids=gpuID)
 
 	criterion = nn.CrossEntropyLoss()
-
 	optimizer = optim.Adam(bert.parameters(), lr=learn_rate)
-
-	#optimizer = optim.SGD(bert.parameters(), lr=0.001, momentum=0.9)
-	#optimizer = optim.AdamW(bert.parameters(), lr=1e-3, amsgrad=False)
-	#optimizer = torch.optim.RMSprop(bert.parameters(), lr=0.001)
-	#optimizer = optim.Adam(bert.parameters(), lr=1e-3, eps=1e-08, weight_decay=0.0)
-	#optimizer = optim.Adam(bert.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=0.01)
-	#optim_schedule = ScheduledOptim(optimizer, 7 , n_warmup_steps=1000)
 
 	print(" |- Total Model Parameters:", sum([p.nelement() for p in bert.parameters()]))
 	print(" |- Start =BERT_basic= training with [lr=%.5f]..." %(learn_rate))
 
-	"""
-	print(" |- start learning rate finding ... ")
-	lr_finder = LRFinder(bert, optimizer, criterion, device="cuda")
-	lr_finder.range_test(train_generator, end_lr=100, num_iter=100)
-	lr_finder.history()
-	#lr_finder.plot() # to inspect the loss-learning rate graph
-	lr_finder.reset() # to reset the model and optimizer to their initial state
-	print(" -- finished leanring rate searching. ")
-	"""
 
 	best_val_loss = float('inf')
 	train_loss_record, validate_loss_record = [], []
@@ -282,7 +254,6 @@ if __name__ == "__main__":
 	print("\n[+] Methylation %s-motif Model Training for %d-th position [%s] of nanopore fast5 data ..." %("".join(motif), args.m_shift, motif[0][args.m_shift]))
 
 	home_path="/nanopore"
-
 	# loading from dine
 	if args.dataset == "simpson_ecoli":
 		meth_fold_path = home_path + "/data/dev/ecoli_er2925.pcr_MSssI.r9.timp.061716.fast5/pass"

@@ -3,6 +3,7 @@
 """
 2020/04/29 Training the models for methylation classification
 """
+
 import argparse
 from dataProcess.data_loading import *
 from dataProcess.ref_util import get_fast5s
@@ -41,11 +42,7 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 	net.to(device)
 
 	generator = None
-
 	criterion = nn.CrossEntropyLoss()
-
-	#optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-	#optimizer = optim.Adam(net.parameters(), lr=0.001)
 	optimizer = optim.Adam(net.parameters(), lr=learn_rate)
 
 	print(" |- Total Model Parameters:", sum([p.nelement() for p in net.parameters()]))
@@ -131,80 +128,6 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 
 	print('Finishing training. Used [ %.1f] min.' %( (time.time()-train_start)/60))
 
-
-def train_unseg_seq(data_split, model, model_save_path, gpuID, epoch_num, useSEQ=True, plotCurve=True):
-
-	train_start = time.time()
-	train_generator, test_generator, val_generator = data_split
-
-	device = torch.device(gpuID[0] if torch.cuda.is_available() else "cpu")
-	print(" |- Initial model on [%s]" %(device))
-
-	# loading DL models
-	net = globals()[model](device, input_size=7, hidden_size=100, num_layers=3).float()
-	net.to(device)
-
-	criterion = nn.CrossEntropyLoss()
-	optimizer = optim.Adam(net.parameters(), lr=0.001)
-
-	print(" |- Total Model Parameters:", sum([p.nelement() for p in net.parameters()]))
-
-	# training iterations
-	print(" |- Start =seq= training ...")
-	best_val_loss =  float('inf')
-	train_loss_record, validate_loss_record = [], []
-
-	for epoch in range(epoch_num):
-		net.train()
-		running_loss, epoch_loss = 0.0, 0.0
-		for i, data in enumerate(train_generator, 0):
-			inputs, labels = data
-			if len(labels) == 0: continue
-
-			seq_event = inputs[1]
-			seq_event = seq_event.reshape(seq_event.shape[0], -1, 7)
-
-			optimizer.zero_grad()
-			outputs = net(seq_event.to(device))
-
-			loss = criterion(outputs, labels.to(device).long())
-			loss.backward()
-			optimizer.step()
-
-			# print statistics
-			running_loss += loss.item()
-			epoch_loss += loss.item()
-			if i % 1000 == 999:
-				print('[Epoch-%d,iter-%d] Train loss: %.3f' %(epoch, i+1, running_loss / 1000))
-				running_loss=0.0
-
-		epoch_loss = epoch_loss/len(train_generator)
-		train_loss_record.append(epoch_loss)
-
-		###################################################
-		# evluation on the validation set
-		###################################################
-		valid_loss, accuracy, auc_score, precision, recall, sensitivity, specificity = evaluate_unseg_seq(net, criterion, device, val_generator, useSEQ)
-		print('Epoch-{} | Train Loss: {:.4f} | Val Loss: {:.4f} | Accuracy: {:.4f} | AUC: {:.4f}| Precision: {:.4f}, Recall: {:.4f} | Sensitivity: {:.4f}, Specificity: {:.4f}'.format(epoch, epoch_loss, valid_loss, accuracy, auc_score, precision, recall, sensitivity, specificity))
-		validate_loss_record.append(valid_loss)
-
-		# checking point
-		if(valid_loss < best_val_loss and epoch >= min(MIN_EPOCH-1, epoch_num-1)):
-			best_val_loss = valid_loss
-			print(" |+ saving current best checkpoint at [%d]-epoch"  %(epoch))
-			torch.save(net.state_dict(), model_save_path)
-
-	##################### plot training curve ##################
-	if plotCurve:
-		print(" |+ Plot trainint curve ...")
-		plot_curve(train_loss_record, validate_loss_record, model, model_save_path+"_curve.png")
-
-	##################### Evaluation on the test ################
-	if len(test_generator) > 0:
-		print(" |+ Evaluation on the test set ...")
-		detection(net, test_generator, device, model, model_save_path, "both", False, True)
-	
-	print('Finishing training. Used [ %.1f] min.' %( (time.time()-train_start)/60))
 
 
 if __name__ == "__main__":

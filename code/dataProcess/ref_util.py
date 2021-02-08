@@ -3,8 +3,6 @@ Data pre-processing functions in this file are used from deepSignal modules.
 (https://github.com/bioinfomaticsCSU/deepsignal)
 """
 
-
-
 import sys, os, math
 import fnmatch
 import numpy as np
