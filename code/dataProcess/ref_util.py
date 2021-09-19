@@ -51,8 +51,6 @@ def _get_alignment_attrs_of_each_strand(strand_path, h5obj):
             chrom = chrom.split("'")[1]
     chrom_start = alignment_attrs['mapped_start']
 
-    # whether the alignment score can be acuired?
-
     return strand, alignstrand, chrom, chrom_start
 
 
@@ -140,7 +138,7 @@ def sim_seq_singal(seq, mod="squiggle_r94"):
     return gen_signal
 
 # use the 6-mer model to generate the position seperately
-def load_poreModel(modelPath="../data/kmer_models/r9.4_180mv_450bps_6mer/template_median68pA.model"):
+def load_poreModel(modelPath=""):
 
     poreModel = {}
 
@@ -239,17 +237,4 @@ def get_contig2len(ref_path):
     del refseq
     return chrom2len
 
-
-if __name__ == "__main__":
-    seq = "AAGGCTAGCTAGCT"
-    #signal = sim_seq_singal(seq)
-    #print(signal)
-
-    # testing loading k-mer model
-    modelPath="/Users/yaozhong/Research/202003_nanopore_Methylation/data/kmer_models/r9.4_180mv_450bps_6mer/template_median68pA.model"
-    load_poreModel(modelPath)
-
-    # get the reference genome length
-    chrom2len = get_contig2len(reference_path)
-    
 

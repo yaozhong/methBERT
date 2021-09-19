@@ -218,24 +218,25 @@ if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser(description='<PyTorch DeepMehtylation Training>')
 
-	parser.add_argument('--model',     default='BERT',   type=str, required=True,  help="DL models used for the training.")
+	parser.add_argument('--model',     default='BERT',   type=str, required=True,  help="BERT/BERT_plus models used for the training.")
 	parser.add_argument('--model_dir', action="store",   type=str, required=True,  help="directory for saving the trained model.")
 	parser.add_argument('--gpu',       default="cuda:0", type=str, required=False, help='GPU Device(s) used for training')
 	parser.add_argument('--epoch',     default=50,       type=int, required=False, help='Training epcohs')
-	parser.add_argument('--dataset',   default="",       type=str, required=False, help='dataset name')
-	parser.add_argument('--dataset_extra', default="",     type=str, required=False, help='Additional data tag')
-	
+	parser.add_argument('--dataset',   default="",       type=str, required=False,  help='Dataset name')
+	parser.add_argument('--dataset_extra', default="",   type=str, required=False, help='used as the addtitional for Stoiber/Simpson dataset')
+
 	parser.add_argument('--positive_control_dataPath',   default="", type=str, required=False,  help='positive control fast5 dataPath')
 	parser.add_argument('--negative_control_dataPath',   default="", type=str, required=False, help='negative control fast5 dataPath')
 
 	parser.add_argument('--motif',     default="CG",     type=str, required=True, help='motif lists, currently one Motif type only')
-	parser.add_argument('--m_shift',    default=0,        type=int, required=True, help='Methylation target local start position')
+	parser.add_argument('--m_shift',   default=0,        type=int, required=True, help='Methylation target local start position')
 	parser.add_argument('--w_len',     default=21,       type=int, required=False, help='input nucleotide window length')
-	parser.add_argument('--num_worker',default=-1,          type=int, required=False, help='number of working for loading the data')
-	parser.add_argument('--lr',		   default=1e-3,      type=float, required=False, help='learning rate for the training')
+	parser.add_argument('--num_worker',default=-1,       type=int, required=False, help='number of working for loading the data')
+	parser.add_argument('--lr',		   default=1e-4,     type=float, required=False, help='learning rate for the training')
 
 	parser.add_argument('--lm',        default="",        type=str,  required=False, help="Loading the previous trained model for the testing.")
 
+	# the following option is under development.
 	parser.add_argument('--unseg',     action="store_true",          required=False, help='option for un-event segment [default:False]')
 	parser.add_argument('--use_sim',   action="store_true",          required=False, help='use the simulation for input normalization [default:False]')
 	parser.add_argument('--group_eval',action="store_true",          required=False, help='use the simulation for input normalization [default:False]')
@@ -251,8 +252,8 @@ if __name__ == "__main__":
 	motif = [item.upper() for item in args.motif.split(',')]
 
 	print("\n[+] Methylation %s-motif Model Training for %d-th position [%s] of nanopore fast5 data ..." %("".join(motif), args.m_shift, motif[0][args.m_shift]))
-
-
+	print("	 - This may take time for processing fast5 files and generating features (depending on input) ")
+	
 	if args.positive_control_dataPath == "" or args.negative_control_dataPath == "":
 		print("[Data Error]: Please cheching the positive/negative fast5 data path!")
 		exit()

@@ -34,7 +34,6 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 
 	# loading DL models
 	if useSEQ:
-		#net = globals()[model](device, input_size=7, hidden_size=100, num_layers=3).float()
 		net = globals()[model](device, input_size=num_feat, hidden_size=100, num_layers=3).float()
 	else:
 		net = globals()[model](device, input_size=3).float()
@@ -54,6 +53,7 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 	train_loss_record, validate_loss_record = [], []
 
 	for epoch in range(epoch_num):
+
 		net.train()
 		running_loss, epoch_loss = 0.0, 0.0
 		skip_batch = 0
@@ -62,7 +62,7 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 			inputs, labels = data
 
 			# generator data processing part
-			# batch data loader this part can be put into the function
+			# batch data loader.
 			if len(labels) == 0: 
 				skip_batch += 1
 				continue
@@ -76,7 +76,6 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 
 			else:
 				seq_event = inputs[2]
-			#######################
 			
 			optimizer.zero_grad()
 			outputs = net(seq_event.to(device))
@@ -85,10 +84,10 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 			loss.backward()
 			optimizer.step()
 
-			# print statistics
 			running_loss += loss.item()
 			epoch_loss += loss.item()
 
+			# print statistics
 			if i % 1000 == 999:
 				print('[Epoch-%d,iter-%d] Train loss: %.3f' %(epoch, i+1, running_loss / 1000))
 				running_loss=0.0
@@ -104,8 +103,7 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 			print('* Epoch-{} | Train Loss: {:.4f} | Val Loss: {:.4f} | Accuracy: {:.4f} | AUC: {:.4f}| Precision: {:.4f}, Recall: {:.4f} | Sensitivity: {:.4f}, Specificity: {:.4f}'.format(epoch, epoch_loss, valid_loss, accuracy, auc_score, precision, recall, sensitivity, specificity))
 			validate_loss_record.append(valid_loss)
 
-		# checking point
-		#wait_epoch = 10 
+		# Update and save the current best loss parameters
 		if(valid_loss < best_val_loss and epoch >= min(MIN_EPOCH-1, epoch_num-1)):
 			best_val_loss = valid_loss
 			print(" |+ saving current best checkpoint at [%d]-epoch"  %(epoch))
@@ -121,7 +119,7 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 		print(" |+ Plot training curve ...")
 		plot_curve(train_loss_record, validate_loss_record, model, model_save_path+"_curve.png")
 
-	## saving on  the last training iteration
+	## saving on the last training iteration
 	if len(val_generator) == 0:
 		print(" |+ saving checking point on the last epoch, as no-validation set")
 		torch.save(net.state_dict(), model_save_path)
@@ -129,34 +127,37 @@ def train_seq(data_split, model, model_save_path, learn_rate, gpuID, epoch_num, 
 	print('Finishing training. Used [ %.1f] min.' %( (time.time()-train_start)/60))
 
 
-
 if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser(description='<PyTorch DeepMehtylation Training>')
 
 	parser.add_argument('--model',     default='CNN',      type=str, required=True,  help="DL models used for the training.")
-	parser.add_argument('--model_dir', action="store",     type=str, required=True,  help="directory for saving the trained model.")
+	parser.add_argument('--model_dir', action="store",     type=str, required=True,  help="Directory for saving the trained model.")
 	parser.add_argument('--gpu',       default="cuda:0",   type=str, required=False, help='GPU Device(s) used for training')
 	parser.add_argument('--epoch',     default=50,         type=int, required=False, help='Training epcohs')
-	parser.add_argument('--dataset',   default="",         type=str, required=False,  help='dataset name')
-	parser.add_argument('--dataset_extra', default="",     type=str, required=False, help='Additional data tag')
+	parser.add_argument('--dataset',   default="",         type=str, required=False,  help='Dataset name')
+	parser.add_argument('--dataset_extra', default="",     type=str, required=False, help='used as the addtitional for Stoiber/Simpson dataset')
 
 	parser.add_argument('--positive_control_dataPath',   default="", type=str, required=False,  help='positive control fast5 dataPath')
 	parser.add_argument('--negative_control_dataPath',   default="", type=str, required=False, help='negative control fast5 dataPath')
 
 	parser.add_argument('--motif',     default="CG",       type=str, required=True,  help='motif lists, currently one Motif type only')
-	parser.add_argument('--m_shift',   default=0,          type=int, required=False, help='Methylation target local start position')
-	parser.add_argument('--w_len',     default=21,         type=int, required=False, help='input nucleotide window length')
-	parser.add_argument('--unseg',     action="store_true",          required=False, help='option for un-event segment [default:False]')
-	parser.add_argument('--use_sim',   action="store_true",          required=False, help='use the simulation for input normalization [default:False]')
-	parser.add_argument('--gen_model_path',   default="" ,                  required=False, help='use the generator for additional feature in the given model path [default:""]')
-	parser.add_argument('--group_eval',action="store_true",          required=False, help='use the simulation for input normalization [default:False]')
-	parser.add_argument('--num_worker',default=-1,          type=int, required=False, help='number of working for loading the data')
-	parser.add_argument('--lr',		   default=1e-3,      type=float, required=False, help='learning rate for the training')
+	parser.add_argument('--m_shift',   default=-1,          type=int, required=False, help='Methylation target local start position')
+	parser.add_argument('--w_len',     default=21,         type=int, required=False, help='Input nucleotide window length')
+
+	# evaluation options
+	parser.add_argument('--group_eval',action="store_true", required=False, help='use the simulation for input normalization [default:False]')
+	parser.add_argument('--num_worker',default=1,   type=int, required=False, help='number of working for loading the data')
+	parser.add_argument('--lr',		   default=1e-4, type=float, required=False, help='learning rate for the training')
 
 	parser.add_argument('--lm',        default="",        type=str,  required=False, help="Loading the previous trained model for the testing.")
 	parser.add_argument('--vis_data',  default="",        type=str,  required=False, help="viualization signals")
 
+	# the following options is under develpment
+	parser.add_argument('--unseg',     action="store_true", required=False, help='option for un-event segment [default:False]')
+	parser.add_argument('--use_sim',   action="store_true", required=False, help='use the simulation for input normalization [default:False]')
+	parser.add_argument('--gen_model_path',   default="" ,  required=False, help='use the generator for additional feature in the given model path [default:""]')
+	
 	args = parser.parse_args()
 	cores = mp.cpu_count()
 	if args.num_worker > 0 and args.num_worker < cores:
@@ -166,10 +167,10 @@ if __name__ == "__main__":
 	motif = [item.upper() for item in args.motif.split(',')]
 
 	print("\n[+] Methylation %s-motif Model Training for %d-th position [%s] of nanopore fast5 data ..." %("".join(motif), args.m_shift, motif[0][args.m_shift]))
+	print("	 - This may take time for processing fast5 files and generating features (depending on input) ")
 	
 	# add direction path information
 	if args.dataset == "" and args.dataset_extra =="":
-
 		if args.positive_control_dataPath == "" or args.negative_control_dataPath == "":
 			print("[Data Error]: Please cheching the positive/negative fast5 data path!")
 			exit()
@@ -179,7 +180,6 @@ if __name__ == "__main__":
 
 	train_test_split = (0.8, 0.1)
 
-	# place of data use
 	data_split = load_from_2folds(meth_fold_path, pcr_fold_path, cores, 10, motif, args.m_shift, args.w_len, train_test_split, False)
 
 	# data visualization 
@@ -190,7 +190,7 @@ if __name__ == "__main__":
 	print(" |- using [%d] cores." %(cores))
 
 	if args.use_sim:
-		print(" |- *using simulation squiggle in the input!" )
+		print(" |- using simulation squiggle in the input!" )
 
 	if args.lm != "":
 		print(" |- testing the test set using the previous loaded model ...")
