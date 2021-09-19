@@ -5,7 +5,7 @@
 We explore a non-recurrent modeling approach for nanopore methylation detection based on the bidirectional encoder representations from transformers (BERT).
 Compared with the state-of-the-art model with bi-directional recurrent neural networks (RNN), BERT can provide a faster model inference solution without the limit of
 the sequential computation order.
-We use two types of BERTs: the basic one [Devlin et al.] and refined one.
+We use two types of BERTs: the basic one [Devlin et al.] and the refined one.
 The refined BERT is refined according to the task-specific features described as follows.
 
 - learnable postional embedding
@@ -16,10 +16,11 @@ The model structures are shown in the above figure.
 
 ## Docker enviroment
 We provide a docker image for running this source code
+
 ```
 docker pull yaozhong/ont_methylation:0.6
 ```
-* ubuntu 14.04.4
+* ubuntu 16.04.10
 * Python 3.5.2
 * Pytorch 1.5.1+cu101
 ```
@@ -27,6 +28,14 @@ nvidia-docker run -it --shm-size=64G -v LOCAL_DATA_PATH:MOUNT_DATA_PATH yaozhong
 ```
 
 ## Training
+
+### Data sampling and split
+We use reads from complete methylation data and amplicon data (Control) for training models. 
+We provide the following two choice for sampling reads.
+
+- random and balanced selection of reads
+- region-based selection
+
 ```
 N_EPOCH=50
 W_LEN=21
@@ -49,6 +58,8 @@ python3 train_bert.py --model ${MODEL}  --model_dir MODEL_SAVE_PATH --gpu cuda:0
  --positive_control_dataPath ${POSITIVE_SAMPLE_PATH}   --negative_control_dataPath ${NEGATIVE_SAMPLE_PATH} \
  --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR 
 ```
+
+
 
 ## Detection
 
@@ -97,7 +108,7 @@ tombo resquiggle --dna $FAST5_FOLD $REF --processes 24 --corrected-group RawGeno
 
 
 ## Reference
-This source code is refering to the follow github projects. 
+This source code is referring to the follow github projects. 
 - [DeepMOD](https://github.com/WGLab/DeepMod)
 - [DeepSignal](https://github.com/bioinfomaticsCSU/deepsignal)
 - [BERT-pytorch](https://github.com/codertimo/BERT-pytorch)
