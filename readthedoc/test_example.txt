@@ -1,0 +1,18 @@
+# test example of training
+
+	N_EPOCH=50
+	W_LEN=21
+	LR=1e-4
+	MOTIF="GAATTC"
+	BATCH_SIZE=128
+	N_WORKER=64
+	NUCLEOTIDE_LOC_IN_MOTIF=0
+	POSITIVE_SAMPLE_PATH="/nanopore/data/Stoiber/6mA/M_EcoRI_gaAttc"
+	NEGATIVE_SAMPLE_PATH="/nanopore/data/Stoiber/5mC/Control/"
+	MODEL_SAVE_PATH="/data/working/2_nanopore/methylation/github/test_workspace/"
+
+	MODEL="biRNN_basic"
+	python3 train_biRNN.py --model ${MODEL}  --model_dir ${MODEL_SAVE_PATH} --gpu cuda:0 --epoch ${N_EPOCH} \
+ 	--positive_control_dataPath ${POSITIVE_SAMPLE_PATH}   --negative_control_dataPath ${NEGATIVE_SAMPLE_PATH} \
+ 	--motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR \
+ 	--batch_size ${BATCH_SIZE}  --num_worker ${N_WORKER} --data_balance_adjust

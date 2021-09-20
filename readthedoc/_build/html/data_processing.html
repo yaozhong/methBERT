@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Data &mdash; methBERT 2021-06-15 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Models and training" href="training.html" />
+    <link rel="prev" title="Running Enviroment" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> methBERT
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Running Enviroment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-preprocessing">Data preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-sampling-and-split">Data sampling and split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#used-r9-benchmark-dataset">Used R9 Benchmark dataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#stoiber-s-r9-training-dataset">Stoiber’s R9 training dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simpson-s-r9-training-dataset">Simpson’s R9 training dataset</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="training.html">Models and training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Evaluation and methylation prediction</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">methBERT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/data_processing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data">
+<span id="data-processing"></span><h1>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="data-preprocessing">
+<h2>Data preprocessing<a class="headerlink" href="#data-preprocessing" title="Permalink to this headline">¶</a></h2>
+<p>Fast5 files of reads are first preprocessed to generate inputs for neural networks.
+Before that, we assumed each read is already basecalled and aligned to a reference genome.
+The basecalls, events and alignments are saved in the “Analyses” group in the fast5 file.</p>
+<p>If starting from raw fast5 reads, the following tools can be used.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># basecalling (Guppy &gt;=3.2)
+guppy_basecaller -c &lt;CONFIG.file&gt; -i &lt;Fast5 fold&gt; -s &lt;Output fold&gt; -x cuda:all
+
+# alignement (minimap2)
+REF=&lt;Reference genome&gt;
+minimap2 -a -x map-ont $REF output.fastq | samtools sort -T tmp -o output.sorted.bam
+samtools index output.sorted.bam
+
+# re-squggle (Tombo)
+tombo resquiggle &lt;fast5_fold&gt; &lt;Ref_genome_fasta&gt; --processes &lt;num_worker&gt; --corrected-group RawGenomeCorrected_001 --basecall-group Basecall_1D_000 --overwrite
+</pre></div>
+</div>
+<p>Fast5 files can be mannually investigated using HDFView(<a class="reference external" href="https://www.hdfgroup.org/downloads/hdfview/">https://www.hdfgroup.org/downloads/hdfview/</a>).</p>
+</div>
+<div class="section" id="data-sampling-and-split">
+<h2>Data sampling and split<a class="headerlink" href="#data-sampling-and-split" title="Permalink to this headline">¶</a></h2>
+<p>After raw fast5 reads are pre-processed, each read will be used to generate training and testing data
+for target motifs (e.g., CpG).
+Reads of complete methylation data and amplicon data (Control) are used as positive and negative samples, respectively.
+To accelerate the data generating process, we first utilize multi-cores loading processed data into RAM and cached.
+In this stage, a read is a basic unit for preprocessing.
+In the training stage, a screening window surrounding the target motif is the basic unit for the batch training.
+If any GPU is available, batched screening windows are transferred from RAM to GPU memory during training, assuming GPU memory is limited.</p>
+<p>We provide the following two options for generating training and testing data.</p>
+<ol class="arabic">
+<li><p><em>random and balanced selection according to the number of reads</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">data_balance_adjust</span>
+</pre></div>
+</div>
+</li>
+<li><p><em>region-based selection</em></p></li>
+</ol>
+<blockquote>
+<div><p>Provide the region used for the testing with —test_region option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">test_region</span> <span class="n">NC_000913</span><span class="mf">.3</span> <span class="mi">1000000</span> <span class="mi">2000000</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="used-r9-benchmark-dataset">
+<h2>Used R9 Benchmark dataset<a class="headerlink" href="#used-r9-benchmark-dataset" title="Permalink to this headline">¶</a></h2>
+<p>Currently, we only tested the bert models on the benchmark R9 dataset provided by Stoiber (2016) and Simpson (2017)</p>
+<div class="section" id="stoiber-s-r9-training-dataset">
+<h3>Stoiber’s R9 training dataset<a class="headerlink" href="#stoiber-s-r9-training-dataset" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Control (PCR-amplicon)</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="http://s3.climb.ac.uk/nanopore-methylation/Control_lib1.tar">Con1</a></p></li>
+<li><p><a class="reference external" href="http://s3.climb.ac.uk/nanopore-methylation/Control_lib3.tar">Con2</a></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>6mA methylation</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="http://s3.climb.ac.uk/nanopore-methylation/meth1_lib1.tar">TCG[A], Taql</a></p></li>
+<li><p><a class="reference external" href="http://s3.climb.ac.uk/nanopore-methylation/meth4_lib1.tar">GA[A]TTC, EcoRI</a></p></li>
+<li><p><a class="reference external" href="http://s3.climb.ac.uk/nanopore-methylation/meth8_lib2.tar">G[C]GC, Dam</a></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>5mC methylaiton</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="http://s3.climb.ac.uk/nanopore-methylation/meth9_lib2.tar">[C]G, MpeI</a></p></li>
+<li><p><a class="reference external" href="http://s3.climb.ac.uk/nanopore-methylation/meth10_lib3.tar">[C]G, SssI</a></p></li>
+<li><p><a class="reference external" href="http://s3.climb.ac.uk/nanopore-methylation/meth11_lib3.tar">G[A]TC, HhaI</a></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="simpson-s-r9-training-dataset">
+<h3>Simpson’s R9 training dataset<a class="headerlink" href="#simpson-s-r9-training-dataset" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="training.html" class="btn btn-neutral float-right" title="Models and training" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-left" title="Running Enviroment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Yao-zhong Zhang.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

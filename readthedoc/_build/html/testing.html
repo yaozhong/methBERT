@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Evaluation and methylation prediction &mdash; methBERT 2021-06-15 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Models and training" href="training.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> methBERT
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Running Enviroment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_processing.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training.html">Models and training</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Evaluation and methylation prediction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#evaluation-types">Evaluation types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#evaluation-metrics">Evaluation metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#methylation-prediction">Methylation prediction</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">methBERT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Evaluation and methylation prediction</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/testing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="evaluation-and-methylation-prediction">
+<span id="testing"></span><h1>Evaluation and methylation prediction<a class="headerlink" href="#evaluation-and-methylation-prediction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="evaluation-types">
+<h2>Evaluation types<a class="headerlink" href="#evaluation-types" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>single-read level</p></li>
+<li><p>genomic-loci (group-reads) level</p></li>
+</ul>
+</div>
+<div class="section" id="evaluation-metrics">
+<h2>Evaluation metrics<a class="headerlink" href="#evaluation-metrics" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ROC-AUC</p></li>
+<li><p>PR-AUC</p></li>
+</ul>
+</div>
+<div class="section" id="methylation-prediction">
+<h2>Methylation prediction<a class="headerlink" href="#methylation-prediction" title="Permalink to this headline">¶</a></h2>
+<p>We provided independent trained models on each 5mC and 6mA datasets of different motifs and methyltransferases in the ./trained_model fold.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MODEL=&quot;BERT_plus&quot;
+MODEL_SAVE_PATH=&lt;model saved path&gt;
+REF=&lt;reference genome fasta file&gt;
+FAST5_FOLD=&lt;fast5 files to be analyzed&gt;
+OUTPUT=&lt;output file&gt;
+
+time python detect.py --model ${MODEL} --model_dir ${MODEL_SAVE_PATH} \
+--gpu cuda:0  --fast5_fold ${FAST5_FOLD} --num_worker 12 \
+--motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --evalMode test_mode --w_len ${W_LEN} --ref_genome ${REF} --output_file ${OUTPUT}
+</pre></div>
+</div>
+<p>We generate the same output format as the deepSignal (<a class="reference external" href="https://github.com/bioinfomaticsCSU/deepsignal">https://github.com/bioinfomaticsCSU/deepsignal</a>).:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># output example</span>
+<span class="n">NC_000913</span><span class="mf">.3</span>     <span class="mi">4581829</span> <span class="o">+</span>       <span class="mi">4581829</span> <span class="mi">43</span><span class="n">ea7b03</span><span class="o">-</span><span class="mi">8</span><span class="n">d2b</span><span class="o">-</span><span class="mi">4</span><span class="n">df3</span><span class="o">-</span><span class="n">b395</span><span class="o">-</span><span class="mi">536</span><span class="n">b41872137</span>    <span class="n">t</span>       <span class="mf">1.0</span>     <span class="mf">3.0398369e-06</span>   <span class="mi">0</span>       <span class="n">TGCGGGTCTTCGCCATACACG</span>
+<span class="n">NC_000913</span><span class="mf">.3</span>     <span class="mi">4581838</span> <span class="o">+</span>       <span class="mi">4581838</span> <span class="mi">43</span><span class="n">ea7b03</span><span class="o">-</span><span class="mi">8</span><span class="n">d2b</span><span class="o">-</span><span class="mi">4</span><span class="n">df3</span><span class="o">-</span><span class="n">b395</span><span class="o">-</span><span class="mi">536</span><span class="n">b41872137</span>    <span class="n">t</span>       <span class="mf">0.9999996</span>       <span class="mf">0.00013372302</span>   <span class="mi">0</span>       <span class="n">TCGCCATACACGCGCTCAAAC</span>
+<span class="n">NC_000913</span><span class="mf">.3</span>     <span class="mi">4581840</span> <span class="o">+</span>       <span class="mi">4581840</span> <span class="mi">43</span><span class="n">ea7b03</span><span class="o">-</span><span class="mi">8</span><span class="n">d2b</span><span class="o">-</span><span class="mi">4</span><span class="n">df3</span><span class="o">-</span><span class="n">b395</span><span class="o">-</span><span class="mi">536</span><span class="n">b41872137</span>    <span class="n">t</span>       <span class="mf">1.0</span>     <span class="mf">0.0</span>     <span class="mi">0</span>       <span class="n">GCCATACACGCGCTCAAACGG</span>
+<span class="n">NC_000913</span><span class="mf">.3</span>     <span class="mi">4581848</span> <span class="o">+</span>       <span class="mi">4581848</span> <span class="mi">43</span><span class="n">ea7b03</span><span class="o">-</span><span class="mi">8</span><span class="n">d2b</span><span class="o">-</span><span class="mi">4</span><span class="n">df3</span><span class="o">-</span><span class="n">b395</span><span class="o">-</span><span class="mi">536</span><span class="n">b41872137</span>    <span class="n">t</span>       <span class="mf">1.0</span>     <span class="mf">0.0</span>     <span class="mi">0</span>       <span class="n">CGCGCTCAAACGGCTGCAAAT</span>
+<span class="n">NC_000913</span><span class="mf">.3</span>     <span class="mi">4581862</span> <span class="o">+</span>       <span class="mi">4581862</span> <span class="mi">43</span><span class="n">ea7b03</span><span class="o">-</span><span class="mi">8</span><span class="n">d2b</span><span class="o">-</span><span class="mi">4</span><span class="n">df3</span><span class="o">-</span><span class="n">b395</span><span class="o">-</span><span class="mi">536</span><span class="n">b41872137</span>    <span class="n">t</span>       <span class="mf">1.0</span>     <span class="mf">0.0</span>     <span class="mi">0</span>       <span class="n">TGCAAATGCTCGTCGGTAAAC</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="training.html" class="btn btn-neutral float-left" title="Models and training" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Yao-zhong Zhang.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
