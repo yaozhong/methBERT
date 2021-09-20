@@ -2,11 +2,7 @@
 
 ![](figures/BERT_model_refined.png)
 
-We explore a non-recurrent modeling approach for nanopore methylation detection based on the bidirectional encoder representations from transformers (BERT).
-Compared with the state-of-the-art model with bi-directional recurrent neural networks (RNN), BERT can provide a faster model inference solution without the limit of
-the sequential computation order.
-We use two types of BERTs: the basic one [Devlin et al.] and the refined one.
-The refined BERT is refined according to the task-specific features described as follows.
+MethBERT explores a non-recurrent modeling approach for nanopore methylation detection based on the bidirectional encoder representations from transformers (BERT). Compared with the state-of-the-art model using bi-directional recurrent neural networks (RNN), BERT can provide a faster model inference solution without the limit of computation in sequential order. We proviede two types of BERTs: the basic one [Devlin et al.] and the refined one. The refined BERT is refined according to the task-specific features, including:
 
 - learnable postional embedding
 - self-attetion with realtive postion representation [Shaw et al.]
@@ -14,8 +10,13 @@ The refined BERT is refined according to the task-specific features described as
 
 The model structures are shown in the above figure. 
 
+## Installation
+git clone https://github.com/yaozhong/methBERT.git
+cd methBERT
+pip install .
+
 ## Docker enviroment
-We provide a docker image for running this source code
+We also provide a docker image for running this source code
 
 ```
 docker pull yaozhong/ont_methylation:0.6
@@ -45,20 +46,19 @@ MOTIF="CG"
 NUCLEOTIDE_LOC_IN_MOTIF=0
 POSITIVE_SAMPLE_PATH=<methylated fast5 path>
 NEGATIVE_SAMPLE_PATH=<unmethylated fast5 path>
-MODEL_SAVE_PATH=<model saved path>
+MODEL_SAVE_FILE=<model saved path>
 
 # training biRNN model
-python3 train_biRNN.py --model ${MODEL}  --model_dir ${MODEL_SAVE_PATH} --gpu cuda:0 --epoch ${N_EPOCH} \
+python3 train_biRNN.py --model ${MODEL}  --model_dir ${MODEL_SAVE_FILE} --gpu cuda:0 --epoch ${N_EPOCH} \
  --positive_control_dataPath ${POSITIVE_SAMPLE_PATH}   --negative_control_dataPath ${NEGATIVE_SAMPLE_PATH} \
- --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR 
+ --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR --data_balance_adjust
 
 # training bert models
 MODEL="BERT_plus" (option: "BERT", "BERT_plus")
-python3 train_bert.py --model ${MODEL}  --model_dir MODEL_SAVE_PATH --gpu cuda:0 --epoch ${N_EPOCH} \
+python3 train_bert.py --model ${MODEL}  --model_dir ${MODEL_SAVE_FILE} --gpu cuda:0 --epoch ${N_EPOCH} \
  --positive_control_dataPath ${POSITIVE_SAMPLE_PATH}   --negative_control_dataPath ${NEGATIVE_SAMPLE_PATH} \
- --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR 
+ --motif ${MOTIF} --m_shift ${NUCLEOTIDE_LOC_IN_MOTIF} --w_len ${W_LEN} --lr $LR  --data_balance_adjust
 ```
-
 
 
 ## Detection
@@ -97,10 +97,8 @@ which is commonly used as the benchmark data in the previous work.
 - The stoiber's dataset, https://www.biorxiv.org/content/10.1101/094672v2
 - Simpson's dataset, https://www.nature.com/articles/nmeth.4184
 
-The fast5 reads are supposed to be pre-processed with re-squggle ([Tombo](https://github.com/nanoporetech/tombo)) 
-```
-tombo resquiggle --dna $FAST5_FOLD $REF --processes 24 --corrected-group RawGenomeCorrected_001 --basecall-group Basecall_1D_000 
-```
+The fast5 reads are supposed to be pre-processed with re-squggle ([Tombo](https://github.com/nanoporetech/tombo)).
+More detailed information on data pre-prcessing, please refer to readthedoc (data_processing.html)
 
 ### Reference genome
 - E.coli: K-12 sub-strand MG1655
