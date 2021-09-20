@@ -11,9 +11,11 @@ MethBERT explores a non-recurrent modeling approach for nanopore methylation det
 The model structures are shown in the above figure. 
 
 ## Installation
+```
 git clone https://github.com/yaozhong/methBERT.git
 cd methBERT
 pip install .
+```
 
 ## Docker enviroment
 We also provide a docker image for running this source code
