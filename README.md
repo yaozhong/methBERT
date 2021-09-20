@@ -100,12 +100,11 @@ which is commonly used as the benchmark data in the previous work.
 - Simpson's dataset, https://www.nature.com/articles/nmeth.4184
 
 The fast5 reads are supposed to be pre-processed with re-squggle ([Tombo](https://github.com/nanoporetech/tombo)).
-More detailed information on data pre-prcessing, please refer to readthedoc (data_processing.html)
+More detailed information on data pre-prcessing, please refer to [methBERT.readthedoc](https://methbert.readthedocs.io/en/latest/index.html)
 
 ### Reference genome
 - E.coli: K-12 sub-strand MG1655
 - H.sapiens: GRCh38
-
 
 ## Reference
 This source code is referring to the follow github projects. 
